@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Receipt</title>
+    <style>
+        body {
+            font-family: monospace;
+            background: #f0f0f0;
+            text-align: center;
+            padding: 20px;
+        }
+        .receipt {
+            background: white;
+            display: inline-block;
+            text-align: left;
+            padding: 20px;
+            border: 1px dashed #999;
+            width: 280px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .receipt h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+        .receipt p, .receipt li {
+            margin: 4px 0;
+        }
+        ul {
+            padding-left: 15px;
+        }
+        .divider {
+            border-top: 1px dashed #999;
+            margin: 10px 0;
+        }
+        @media print {
+            body {
+                background: none;
+            }
+            .receipt {
+                box-shadow: none;
+                border: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt">
+        <img src="assets/lg.png" alt="Store Logo" style="display:block; margin:0 auto 10px; width:80px;" />
+        <h2>Bochogs' Diner</h2>
+
+        <!-- Table Number -->
+        <p><strong>Table #:</strong> <span id="tableNumber">N/A</span></p>
+
+        <p><strong>Order #:</strong> <span id="orderNumber"></span></p>
+        <p><strong>Date:</strong> <span id="orderDate"></span></p>
+        <p><strong>Payment:</strong> <span id="paymentMethod"></span></p>
+        <p><strong>Status:</strong> Paid</p>
+
+        <div class="divider"></div>
+
+        <p><strong>Items:</strong></p>
+        <ul id="items"></ul>
+
+        <div class="divider"></div>
+
+        <p><strong>Total:</strong> ₱<span id="total">0.00</span></p>
+        
+        <div class="divider"></div>
+
+        <p style="text-align:center;">✅ Thank you!</p>
+        <p style="text-align:center;" id="qrCodeText">Scan QR to review</p>
+        <img id="qrCode" width="100" style="display: block; margin: 0 auto;" />
+    </div>
+
+    <script>
+        // Parse order and payment method
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentMethod = urlParams.get('paymentMethod') || 'Unknown';
+        const tableNumber = urlParams.get('tableNumber') || 'N/A';  // Retrieve table number from URL
+
+        const orderData = JSON.parse(localStorage.getItem('order')) || {
+            orderNumber: Math.floor(Math.random() * 1000000),
+            items: [],
+            total: 0
+        };
+
+        // Insert table number
+        document.getElementById('tableNumber').textContent = tableNumber;
+
+        // Insert order details
+        document.getElementById('orderNumber').textContent = orderData.orderNumber;
+
+        const now = new Date();
+        document.getElementById('orderDate').textContent = now.toLocaleString('en-PH', {
+            dateStyle: 'medium',
+            timeStyle: 'short'
+        });
+
+        document.getElementById('paymentMethod').textContent = paymentMethod.toUpperCase();
+        document.getElementById('total').textContent = orderData.total.toFixed(2);
+
+        const itemsList = document.getElementById('items');
+        orderData.items.forEach(item => {
+            const li = document.createElement('li');
+            li.textContent = `${item.qty} x ${item.name} - ₱${(item.qty * item.price).toFixed(2)}`;
+            itemsList.appendChild(li);
+        });
+
+        // Optional QR Code using Google Chart API (for reference, feedback, or reprint link)
+        const qrContent = `https://your-kiosk-site.com/order/${orderData.orderNumber}`;
+        document.getElementById('qrCode').src = `https://chart.googleapis.com/chart?chs=120x120&cht=qr&chl=${encodeURIComponent(qrContent)}`;
+
+        // Auto-print on load
+        window.onload = () => {
+            window.print();
+
+            // Optionally redirect after a few seconds
+            setTimeout(() => {
+                localStorage.clear();
+                location.href = "index.html";
+            }, 5000);
+        };
+    </script>
+</body>
+</html>

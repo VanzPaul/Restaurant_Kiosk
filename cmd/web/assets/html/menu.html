@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Menu</title>
+</head>
+<body class="bg-white p-10 font-sans min-h-screen pb-32 text-2xl">
+  <!-- Header -->
+  <header class="flex justify-between items-center mb-10">
+    <div class="flex items-center">
+      <img src="//assets/media/media/lg.png" alt="Restaurant Logo" class="w-20 h-20 mr-6" />
+      <h1 class="text-5xl font-bold">Select Your Items</h1>
+    </div>
+    <div class="relative">
+      <input 
+        type="search" 
+        id="searchMenu" 
+        placeholder="Search menu..." 
+        class="px-6 py-4 border-2 border-gray-300 rounded-xl w-96 text-2xl"
+      />
+    </div>
+  </header>
+
+  <!-- Categories -->
+  <div class="categories mb-10 flex gap-6 overflow-x-auto pb-4">
+    <button class="category-btn px-6 py-3 rounded-full bg-yellow-300 font-semibold hover:bg-yellow-400 active:bg-yellow-500">All</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Meriendabest</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Budget Meals</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Hero Meals</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Sulit Combusog</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Platter Menu</button>
+    <button class="category-btn px-6 py-3 rounded-full bg-gray-300 hover:bg-yellow-300">Drinks</button>
+  </div>
+
+  <!-- Menu Items -->
+  <div id="menu" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Menu items will be dynamically inserted here -->
+  </div>
+
+  <!-- Footer -->
+  <footer class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center shadow-inner border-t-2 border-gray-200">
+    <button 
+    class="bg-red-500 text-white px-10 py-5 rounded-2xl text-3xl font-bold hover:bg-red-600 transition"
+    onclick="location.href='order-type.html'"
+  >
+    Cancel
+  </button>
+  
+    <button 
+      class="bg-green-500 text-white px-10 py-5 rounded-2xl text-3xl font-bold hover:bg-green-600 transition"
+      onclick="location.href='cart.html'"
+    >
+      View Cart
+    </button>
+  </footer>
+
+  <!-- Script -->
+  <script>
+    let cart = [];
+
+    const existingCart = localStorage.getItem('cart');
+    if (existingCart) {
+      cart = JSON.parse(existingCart);
+    }
+
+    const menuItems = [
+      { id: 1, name: "Fries", price: 55, category: "Meriendabest", image: "/assets/media/fries.jpg" },
+      { id: 2, name: "Crispy Chicken Burger", price: 110, category: "Meriendabest", image: "/assets/media/chicken-burger.jpg" },
+      { id: 3, name: "Fish N Chips", price: 120, category: "Meriendabest", image: "/assets/media/fish-chips.jpg" },
+      { id: 4, name: "Signature Nachos", price: 125, category: "Meriendabest", image: "/assets/media/nachos.jpg" },
+      { id: 5, name: "Baked Spaghetti", price: 125, category: "Meriendabest", image: "/assets/media/baked spaghetti.jpg" },
+      { id: 6, name: "Baked Potatoes", price: 175, category: "Meriendabest", image: "/assets/media/baked potatoes.jpg" },
+      { id: 7, name: "Hotsilog", price: 99, category: "Budget Meals", image: "/assets/media/hotsilog.jpg" },
+      { id: 8, name: "Shanghaisilog", price: 99, category: "Budget Meals", image: "/assets/media/shanghaisilog.jpg" },
+      { id: 9, name: "Liemposilog", price: 125, category: "Budget Meals", image: "/assets/media/liemposilog.jpg" },
+      { id: 10, name: "Chicksilog", price: 120, category: "Budget Meals", image: "/assets/media/chicksilog.jpg" },
+      { id: 11, name: "Tosilog", price: 110, category: "Budget Meals", image: "/assets/media/tosilog.jpg" },
+      { id: 12, name: "Tapsilog", price: 125, category: "Budget Meals", image: "/assets/media/tapsilog.jpg" },
+      { id: 13, name: "Crispy Dinuguan", price: 120, category: "Hero Meals", image: "/assets/media/crispy dinuguan.jpg" },
+      { id: 14, name: "Flavored Wings", price: 135, category: "Hero Meals", image: "/assets/media/wings.jpg" },
+      { id: 15, name: "Salisburry Steak", price: 140, category: "Hero Meals", image: "/assets/media/steak.jpg" },
+      { id: 16, name: "Salted Egg & Prawn", price: 140, category: "Hero Meals", image: "/assets/media/salted egg prawn.jpg" },
+      { id: 17, name: "Lechon Kawali", price: 140, category: "Hero Meals", image: "/assets/media/lechon kawali.jpg" },
+      { id: 18, name: "Chicken Thigh BBQ", price: 145, category: "Hero Meals", image: "/assets/media/chicken bbq.jpg" },
+      { id: 19, name: "Pork Adobo, Ensaladang Talong with Plain Rice", price: 149, category: "Sulit Combusog", image: "/assets/media/adobo.jpg" },
+      { id: 20, name: "Crispy Fried Chicken, Stir fry Veggies, Lumpiang Shanghai with Java Rice", price: 159, category: "Sulit Combusog", image: "/assets/media/fried-chicken.jpg" },
+      { id: 21, name: "Bochogs' Original Sisig, Lumpiang Shanghai with Java Rice", price: 159, category: "Sulit Combusog", image: "/assets/media/sisig.jpg" },
+      { id: 22, name: "Plain Rice", price: 120, category: "Platter Menu", image: "/assets/media/plain-rice.jpg" },
+      { id: 23, name: "Java Rice", price: 135, category: "Platter Menu", image: "/assets/media/java-rice.jpg" },
+      { id: 24, name: "Stir Fry Veggies", price: 185, category: "Platter Menu", image: "/assets/media/stir-fry-veggies.jpg" },
+      { id: 25, name: "Calamansi Juice", price: 35, category: "Drinks", image: "/assets/media/calamansi-juice.jpg" },
+      { id: 26, name: "Cucumber Lemonade", price: 35, category: "Drinks", image: "/assets/media/cucumber-lemonade.jpg" },
+      { id: 27, name: "Coke Regular", price: 25, category: "Drinks", image: "/assets/media/coke.jpg" }
+    ];
+
+    function displayMenuItems(items) {
+      const menuDiv = document.getElementById("menu");
+      menuDiv.innerHTML = '';
+      items.forEach(item => {
+        const btn = document.createElement("button");
+        btn.className = "p-6 bg-white-200 rounded-2xl text-2xl font-semibold hover:bg-gray-200 transition-colors text-left w-full";
+        btn.innerHTML = `
+          <div class="flex items-center gap-6">
+            <img src="${item.image}" alt="${item.name}" class="w-24 h-24 object-cover rounded-lg shadow-md" />
+            <div>
+              <h3 class="font-bold text-xl">${item.name}</h3>
+              <p class="text-lg">₱${item.price}</p>
+            </div>
+          </div>
+        `;
+        btn.onclick = () => {
+          cart.push(item);
+          localStorage.setItem('cart', JSON.stringify(cart));
+          btn.classList.add('bg-green-200');
+          setTimeout(() => btn.classList.remove('bg-green-200'), 300);
+        };
+        menuDiv.appendChild(btn);
+      });
+    }
+
+    // Load menu on page load
+    displayMenuItems(menuItems);
+
+    // Search filter
+    document.getElementById('searchMenu').addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      const filteredItems = menuItems.filter(item => 
+        item.name.toLowerCase().includes(searchTerm)
+      );
+      displayMenuItems(filteredItems);
+    });
+
+    // Category buttons
+    document.querySelectorAll('.category-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const category = e.target.textContent;
+        document.querySelectorAll('.category-btn').forEach(b => {
+          b.classList.remove('bg-yellow-300');
+          b.classList.add('bg-gray-300');
+        });
+        btn.classList.remove('bg-gray-300');
+        btn.classList.add('bg-yellow-300');
+
+        if (category === 'All') {
+          displayMenuItems(menuItems);
+        } else {
+          const filteredItems = menuItems.filter(item => item.category === category);
+          displayMenuItems(filteredItems);
+        }
+      });
+    });
+  </script>
+</body>
+</html>

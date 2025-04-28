@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Cart</title>
+</head>
+<body class="bg-gray-50 p-6 font-sans min-h-screen pb-24">
+    <h1 class="text-3xl font-bold mb-6">Your Cart</h1>
+    
+    <div id="cartItems" class="space-y-4 mb-8">
+        <!-- Cart items will be dynamically inserted here -->
+    </div>
+
+    <div id="total" class="text-2xl font-bold mb-4">
+        <!-- Total will be dynamically calculated -->
+    </div>
+
+    <footer class="fixed bottom-0 left-0 w-full bg-white p-6 flex justify-between items-center shadow-inner">
+        <div class="space-x-4">
+            <button 
+                class="text-blue-600 text-2xl font-semibold underline hover:text-blue-700 px-6 py-4 rounded-xl"
+                onclick="location.href='menu.html'"
+            >
+                Add More
+            </button>
+            <button 
+                class="text-red-600 text-2xl font-semibold underline hover:text-red-700 px-6 py-4 rounded-xl"
+                onclick="clearCart()"
+            >
+                Clear Cart
+            </button>
+        </div>  
+        <button 
+    id="checkoutBtn"
+    class="bg-green-500 text-white px-10 py-5 rounded-2xl text-3xl font-bold hover:bg-green-600 transition-colors disabled:opacity-50"
+    onclick="proceedToPayment()"
+>
+    Proceed to Payment
+</button>
+    </footer>
+
+    <script>
+        function clearCart() {
+            if (confirm('Are you sure you want to clear your cart?')) {
+                localStorage.removeItem('cart');
+                location.href = 'index.html';
+            }
+        }
+
+        function displayCart() {
+            const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+            const cartDiv = document.getElementById('cartItems');
+            const checkoutBtn = document.getElementById('checkoutBtn');
+            
+            if (cartItems.length === 0) {
+                cartDiv.innerHTML = '<p class="text-gray-500 text-xl">Your cart is empty</p>';
+                checkoutBtn.disabled = true;
+                return;
+            }
+
+            // Group items by id and count quantities
+            const groupedItems = cartItems.reduce((acc, item) => {
+                if (!acc[item.id]) {
+                    acc[item.id] = { ...item, quantity: 0 };
+                }
+                acc[item.id].quantity++;
+                return acc;
+            }, {});
+
+            let total = 0;
+            cartDiv.innerHTML = Object.values(groupedItems).map(item => {
+                total += item.price * item.quantity;
+                return `
+    <div class="flex justify-between items-center p-6 bg-white rounded-2xl shadow-md">
+        <span class="text-2xl font-semibold">${item.name}</span>
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-3">
+                <button onclick="updateQuantity(${item.id}, -1)" 
+                    class="bg-gray-200 text-2xl px-4 py-2 rounded-xl hover:bg-gray-300">−</button>
+                <span class="text-2xl w-10 text-center">${item.quantity}</span>
+                <button onclick="updateQuantity(${item.id}, 1)" 
+                    class="bg-gray-200 text-2xl px-4 py-2 rounded-xl hover:bg-gray-300">+</button>
+            </div>
+            <span class="text-2xl font-bold w-32 text-right">₱${(item.price * item.quantity).toFixed(2)}</span>
+        </div>
+    </div>
+`;
+            }).join('');
+
+            document.getElementById('total').textContent = `Total: ₱${total.toFixed(2)}`;
+        }
+
+        function updateQuantity(itemId, change) {
+            let cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            if (change < 0) {
+                // Remove one instance of the item
+                const index = cartItems.findIndex(item => item.id === itemId);
+                if (index !== -1) {
+                    cartItems.splice(index, 1);
+                }
+            } else {
+                // Add one more instance of the item
+                const item = cartItems.find(item => item.id === itemId);
+                if (item) {
+                    cartItems.push({...item});
+                }
+            }
+            
+            localStorage.setItem('cart', JSON.stringify(cartItems));
+            displayCart();
+        }
+
+        function proceedToPayment() {
+            const cartItems = JSON.parse(localStorage.getItem('cart') || '[]');
+            
+            // Validate cart is not empty
+            if (cartItems.length === 0) {
+                alert('Your cart is empty!');
+                return;
+            }
+
+            // Calculate order details
+            const orderDetails = cartItems.reduce((acc, item) => {
+                acc.subtotal += item.price;
+                return acc;
+            }, {
+                subtotal: 0,
+                tax: 0,
+                total: 0,
+                items: cartItems
+            });
+
+            // Calculate tax (12% VAT)
+            orderDetails.tax = orderDetails.subtotal * 0.12;
+            orderDetails.total = orderDetails.subtotal + orderDetails.tax;
+
+            // Save order details for payment page
+            localStorage.setItem('orderDetails', JSON.stringify(orderDetails));
+
+            // Redirect to payment page
+            location.href = 'payment.html';
+        }
+
+        // Initialize cart display
+        displayCart();
+    </script>
+</body>
+</html>

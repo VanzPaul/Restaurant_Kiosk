@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Order Type</title>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center">
+  <div class="bg-white p-16 rounded-3xl shadow-2xl text-center w-[95%] max-w-3xl text-3xl">
+    <h1 class="text-5xl font-bold mb-16 text-gray-800">Choose Order Type</h1>
+
+    <div class="flex flex-col sm:flex-row justify-center items-center gap-10">
+      <!-- Dine-In Button -->
+      <button 
+        onclick="location.href='menu.html'"
+        class="flex flex-col items-center bg-green-500 text-white px-10 py-8 rounded-3xl hover:bg-green-600 transition-all w-72"
+      >
+        <img src="/assets/media/dinein.png" alt="Dine-In" class="w-28 h-28 mb-4 object-contain" />
+        Dine-In
+      </button>
+
+      <!-- Takeout Button -->
+      <button 
+        onclick="location.href='menu.html'"
+        class="flex flex-col items-center bg-blue-500 text-white px-10 py-8 rounded-3xl hover:bg-blue-600 transition-all w-72"
+      >
+        <img src="/assets/media/takeout.png" alt="Takeout" class="w-28 h-28 mb-4 object-contain" />
+        Takeout
+      </button>
+    </div>
+
+    <!-- Cancel Button -->
+    <button 
+      onclick="location.href='index.html'"
+      class="mt-16 bg-red-500 text-white text-3xl font-bold px-12 py-4 rounded-2xl hover:bg-red-600 transition-colors"
+    >
+      Cancel
+    </button>
+  </div>
+</body>
+</html>
