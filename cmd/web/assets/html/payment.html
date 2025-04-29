@@ -50,7 +50,12 @@
             </button>
         </div>
         -->
-        <div>
+        <div class="">
+            <button onclick="pay('cash')" class="p-6 bg-blue-100 rounded-xl hover:bg-blue-200 transition-colors flex flex-col justify-self-center w-full">
+                <i class="fas fa-money-bill text-3xl mb-2"></i>
+                <div class="text-lg font-semibold">Cash</div>
+            </button>
+            <p class="justify-self-center"> or </p>
             <div id="paypal-button-container"></div>
             <p id="result-message"></p>
             <script src="https://www.paypal.com/sdk/js?client-id=test&buyer-country=US&currency=USD&components=buttons&enable-funding=venmo,paylater,card"
@@ -75,206 +80,15 @@
             
             if (orderDetails.items) {
                 summaryDiv.innerHTML = orderDetails.items.map(item => `
-    <div class="flex justify-between items-center py-2 text-lg md:text-xl font-medium">
-        <span class="truncate max-w-[70%]">${item.name}</span>
-        <span class="text-right font-semibold">₱${item.price.toFixed(2)}</span>
-    </div>
-`).join('');
+                    <div class="flex justify-between items-center py-2 text-lg md:text-xl font-medium">
+                        <span class="truncate max-w-[70%]">${item.name}</span>
+                        <span class="text-right font-semibold">₱${item.price.toFixed(2)}</span>
+                    </div>
+                `).join('');
 
                 document.getElementById('subtotal').textContent = `₱${orderDetails.subtotal.toFixed(2)}`;
                 document.getElementById('tax').textContent = `₱${orderDetails.tax.toFixed(2)}`;
                 document.getElementById('total').textContent = `₱${orderDetails.total.toFixed(2)}`;
-            }
-        }
-
-        // Add these constants at the top of your script
-        const SERIAL_PORT = 'COM4'; // Adjust based on your device port
-        const BILL_ACCEPTOR_COMMANDS = {
-            ENABLE: [0x02, 0x03, 0x01, 0x14],
-            DISABLE: [0x02, 0x03, 0x00, 0x15]
-        };
-
-        async function initializeCashDevices() {
-            try {
-                // Request serial port access
-                const port = await navigator.serial.requestPort();
-                await port.open({ baudRate: 9600 });
-                return port;
-            } catch (error) {
-                console.error('Failed to initialize cash devices:', error);
-                return null;
-            }
-        }
-
-        async function processCashPayment(totalAmount) {
-            let collectedAmount = 0;
-            const cashDisplay = document.createElement('div');
-            cashDisplay.innerHTML = `
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white p-10 rounded-2xl shadow-2xl w-full max-w-xl text-center space-y-6">
-            <h3 class="text-3xl font-bold text-gray-800">Insert Cash</h3>
-            <div class="text-2xl text-gray-700">
-                <p class="mb-2">Amount Due: <span class="font-bold text-black">₱${totalAmount.toFixed(2)}</span></p>
-                <p class="mb-2">Collected: <span id="collected" class="font-bold text-green-600">0.00</span></p>
-                <p class="mb-2">Remaining: <span id="remaining" class="font-bold text-red-600">${totalAmount.toFixed(2)}</span></p>
-            </div>
-            <button id="cancelCash" class="mt-6 px-6 py-3 bg-red-500 hover:bg-red-600 text-white text-lg rounded-xl shadow">
-                Cancel
-            </button>
-        </div>
-    </div>
-`;
-            document.body.appendChild(cashDisplay);
-
-            const port = await initializeCashDevices();
-            if (!port) {
-                alert('Failed to initialize cash devices. Please try again.');
-                document.body.removeChild(cashDisplay);
-                return false;
-            }
-
-            return new Promise(async (resolve) => {
-                const reader = port.readable.getReader();
-                const writer = port.writable.getWriter();
-
-                // Enable bill acceptor
-                await writer.write(new Uint8Array(BILL_ACCEPTOR_COMMANDS.ENABLE));
-
-                // Handle bill/coin acceptance
-                const readLoop = async () => {
-                    try {
-                        while (true) {
-                            const { value, done } = await reader.read();
-                            if (done) break;
-                            
-                            // Process the received data (example values)
-                            const receivedAmount = processDenomination(value);
-                            collectedAmount += receivedAmount;
-                            
-                            document.getElementById('collected').textContent = collectedAmount.toFixed(2);
-                            document.getElementById('remaining').textContent = 
-                                Math.max(0, totalAmount - collectedAmount).toFixed(2);
-
-                            if (collectedAmount >= totalAmount) {
-                                await writer.write(new Uint8Array(BILL_ACCEPTOR_COMMANDS.DISABLE));
-                                document.body.removeChild(cashDisplay);
-                                resolve(true);
-                                break;
-                            }
-                        }
-                    } catch (error) {
-                        console.error('Error reading from cash devices:', error);
-                    }
-                };
-
-                document.getElementById('cancelCash').onclick = async () => {
-                    await writer.write(new Uint8Array(BILL_ACCEPTOR_COMMANDS.DISABLE));
-                    document.body.removeChild(cashDisplay);
-                    resolve(false);
-                };
-
-                readLoop();
-            });
-        }
-
-        function processDenomination(data) {
-            // This function should be implemented according to your device's protocol
-            // Example implementation:
-            const denominationMap = {
-                0x01: 20,   // ₱20 bill
-                0x02: 50,   // ₱50 bill
-                0x03: 100,  // ₱100 bill
-                0x04: 200,  // ₱200 bill
-                0x05: 500,  // ₱500 bill
-                0x06: 1000  // ₱1000 bill
-            };
-            return denominationMap[data[0]] || 0;
-        }
-
-        // Add these functions after displayOrderSummary()
-        function updateStaffDisplay(orderDetails) {
-            // Update current order on staff display
-            localStorage.setItem('currentOrder', JSON.stringify({
-                orderId: Date.now(),
-                timestamp: new Date().toISOString(),
-                items: orderDetails.items,
-                total: orderDetails.total
-            }));
-
-            // Update order queue
-            const queue = JSON.parse(localStorage.getItem('orderQueue') || '[]');
-            queue.push({
-                orderId: Date.now(),
-                timestamp: new Date().toISOString(),
-                items: orderDetails.items,
-                total: orderDetails.total
-            });
-            localStorage.setItem('orderQueue', JSON.stringify(queue));
-        }
-
-        // Modify the pay function to include staff display updates
-        async function pay(method) {
-            const orderDetails = JSON.parse(localStorage.getItem('orderDetails') || '{}');
-            updateStaffDisplay(orderDetails);
-            
-            if (method === 'cash') {
-                // Show loading state
-                const loadingEl = document.createElement('div');
-                loadingEl.innerHTML = '<div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center"><div class="bg-white p-6 rounded-lg">Initializing cash devices...</div></div>';
-                document.body.appendChild(loadingEl);
-
-                try {
-                    const paymentSuccess = await processCashPayment(orderDetails.total);
-                    document.body.removeChild(loadingEl);
-                    
-                    if (paymentSuccess) {
-                        localStorage.setItem('paymentMethod', 'cash');
-                        localStorage.setItem('paymentStatus', 'completed');
-                        location.href = 'receipt.html';
-                    }
-                } catch (error) {
-                    console.error('Cash payment error:', error);
-                    alert('Cash payment processing failed. Please try again.');
-                    document.body.removeChild(loadingEl);
-                }
-            } else if (method === 'card' || method === 'epayment') {
-                try {
-                    // Create PayMongo payment intent
-                    const response = await fetch('https://api.paymongo.com/v1/payment_intents', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Basic ' + btoa('your_paymongo_secret_key_here')
-                        },
-                        body: JSON.stringify({
-                            data: {
-                                attributes: {
-                                    amount: Math.round(orderDetails.total * 100), // Convert to cents
-                                    payment_method_allowed: [
-                                        method === 'card' ? 'card' : 'gcash'
-                                    ],
-                                    currency: 'PHP',
-                                    description: `Order #${Date.now()}`,
-                                    statement_descriptor: 'Restaurant Kiosk'
-                                }
-                            }
-                        })
-                    });
-
-                    const paymentIntent = await response.json();
-                    
-                    // Redirect to PayMongo checkout page
-                    if (paymentIntent.data.attributes.client_key) {
-                        window.location.href = `https://payment.paymongo.com/checkout?client_key=${paymentIntent.data.attributes.client_key}`;
-                    } else {
-                        throw new Error('Failed to create payment intent');
-                    }
-
-                } catch (error) {
-                    console.error('Payment error:', error);
-                    alert('Payment processing failed. Please try again.');
-                    return;
-                }
             }
         }
 
