@@ -56,11 +56,16 @@
                 <div class="text-lg font-semibold">Cash</div>
             </button>
             <p class="justify-self-center"> or </p>
-            <div id="paypal-button-container"></div>
+            <!-- Xendit Payment Button -->
+            <div id="xendit-button-container">
+                <button id="xendit-button" class="p-6 bg-purple-100 rounded-xl hover:bg-purple-200 transition-colors w-full">
+                    <i class="fas fa-mobile-alt text-3xl mb-2"></i>
+                    <div class="text-lg font-semibold">Pay with Xendit</div>
+                </button>
+            </div>
             <p id="result-message"></p>
-            <script src="https://www.paypal.com/sdk/js?client-id=test&buyer-country=US&currency=USD&components=buttons&enable-funding=venmo,paylater,card"
-                data-sdk-integration-source="developer-studio"></script>
-            <script src="/assets/js/paypal.js"></script>
+            <!-- Include the Xendit JavaScript -->
+            <script src="/assets/js/xendit.js"></script>
         </div>
 
         <!-- Back Button -->
